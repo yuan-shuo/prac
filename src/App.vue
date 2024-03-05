@@ -40,6 +40,9 @@
           <td><input type="number" v-model.number="cal_table.cd"></td>
         </tr>
       </table>
+
+      <div class="divideLine"></div>
+
       <table class="tableInput2">
         <tr>
           <td><label>列车每节长度:</label></td>
@@ -62,6 +65,9 @@
           <td><input type="number" step="0.01" v-model.number="c_b"></td>
         </tr>
       </table>
+
+      <div class="divideLine"></div>
+
       <table class="tableInput3">
         <tr>
           <td><label>输入入口名称:</label></td>
@@ -77,17 +83,28 @@
         <li v-for="todo in ie" :key="todo.id">
           通道：{{ todo.text }}
           人数：{{ todo.num }}
-          <button @click="removeTodo(todo)">X</button>
+          <button @click="removeTodo(todo)">删除</button>
         </li>
       </ul>
-      <span>{{ ie }}</span>
       <button @click="subData" class="postBtn">- admit (POST) - </button>
     </div>
 
     <div class="divider"></div>
 
     <div class="outp">
-      <span>{{ mes }}</span>
+      <!-- <span>{{ mes }}</span> -->
+      <div class="titleBox"># i1.站台有效长度数据计算</div>
+      <div class="textBox" v-if="mes.len">{{ mes.len }}</div>
+      <div class="titleBox"># i2.楼梯与自动楼梯</div>
+      <div class="textBox" v-for="(str, index) in mes.stair" :key="index">{{ str }}</div>
+      <div class="titleBox"># i3.站台宽度计算（客流计算法）</div>
+      <div class="textBox" v-for="(str, index) in mes.width" :key="index">{{ str }}</div>
+      <div class="titleBox"># i4.售检票设施数量计算</div>
+      <div class="textBox" v-for="(str, index) in mes.equip" :key="index">{{ str }}</div>
+      <div class="titleBox"># i5.出入口设计</div>
+      <div v-for="(arr, index) in mes.enter" :key="index">
+        <div class="textBox" v-for="(str, index) in arr" :key="index">{{ str }}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -137,6 +154,10 @@ export default {
   },
   methods: {
     subData() {
+      this.ie.forEach(item => {
+        this.enterk.push(item.text);
+        this.enterv.push(item.num);
+      });
       const postData = {
         ckey: 'ys',
         s_l: this.s_l,
@@ -147,9 +168,10 @@ export default {
         n_b: this.n_b, 
         c_b: this.c_b, 
         k: this.k,
-        enterk: ["A1","A2","B1","B2","C"],
-        enterv: [810,810,448,471,938]
+        enterk: this.enterk,
+        enterv: this.enterv
       };
+      
       axios.post('http://127.0.0.1:8000/lea/', postData, {
       headers: {
         'Content-Type': 'application/json'
@@ -162,6 +184,8 @@ export default {
       this.mes.width = res.width
       this.mes.equip = res.equip
       this.mes.enter = res.enter
+      this.enterk = [],
+      this.enterv = []
     })
     .catch(error => {
       console.error('Error', error)
@@ -227,6 +251,9 @@ export default {
   text-align: right;
   margin-left: -5px;
 }
+.tableInput1 {
+  margin-top: 20px
+}
 .tableInput1 td {
   text-align: center;
 }
@@ -238,9 +265,9 @@ export default {
   border: 1px solid black;
   padding: 8px;
 }
-.tableInput1{
+/* .tableInput1{
   margin: 20px;
-}
+} */
 /* .tableInput2 {
   padding-left: 125px;
   margin-bottom: 20px;
@@ -251,7 +278,24 @@ export default {
  margin: 20px;
  border-radius: 9px;
 }
-
+.divideLine {
+  width:450px;
+  height: 1px;
+  background-color: #0000006b;
+  margin: 20px;
+}
+.textBox {
+  margin: 5px;
+  padding: 5px;
+  margin-bottom: 10px;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow:rgba(0, 0, 0, 0.45) 0px 0px 3px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 
 
 
